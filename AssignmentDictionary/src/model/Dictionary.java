@@ -32,4 +32,8 @@ public class Dictionary {
         System.out.println("Từ điển load được: " + data.keySet());
 
     }
+
+    public Object getAllWords() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

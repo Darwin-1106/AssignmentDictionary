@@ -8,9 +8,10 @@
  * @author Lenovo
  */
 import model.Dictionary;
+import model.SimpleDictionary;
 import storage.DictionaryStorage;
 import storage.IndexedFileDictionaryStorage;
-import ui.DictionaryGUI;
+import ui.DictionaryApp;
 
 public class main {
 
@@ -21,8 +22,8 @@ public class main {
         // TODO code application logic here
    javax.swing.SwingUtilities.invokeLater(() -> {
             DictionaryStorage storage = new IndexedFileDictionaryStorage(); // Sử dụng chỉ mục
-            Dictionary dictionary = new Dictionary(storage);
-            DictionaryGUI gui = new DictionaryGUI(dictionary);
+            SimpleDictionary dictionary = new SimpleDictionary(storage);
+            DictionaryApp app = new DictionaryApp(dictionary);
             gui.setVisible(true);
         });
     }
