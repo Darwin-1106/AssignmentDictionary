@@ -18,6 +18,8 @@ public class Dictionary {
     public Dictionary(DictionaryStorage storage) {
         this.storage = storage;
         storage.load(data);
+        System.out.println("Từ điển load được: " + data.keySet());
+
     }
 
     public String lookup(String word) {
@@ -27,5 +29,7 @@ public class Dictionary {
     public void addWord(String word, String meaning) {
         data.put(word.toLowerCase(), meaning);
         storage.save(data);
+        System.out.println("Từ điển load được: " + data.keySet());
+
     }
 }

@@ -10,8 +10,10 @@ package storage;
  */
 import java.io.*;
 import java.util.*;
-public class IndexedFileDictionaryStorage implements DictionaryStorage{
-     private final String dataFile = "dictionary.dat";
+
+public class IndexedFileDictionaryStorage implements DictionaryStorage {
+
+    private final String dataFile = "dictionary.dat";
     private final String indexFile = "index.idx";
     private final Map<String, Long> indexMap = new HashMap<>();
 
@@ -24,7 +26,13 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage{
         try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
             for (Map.Entry<String, Long> entry : indexMap.entrySet()) {
                 raf.seek(entry.getValue());
-                String line = raf.readLine();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int b;
+                while ((b = raf.read()) != -1 && b != '\n') {
+                    baos.write(b);
+                }
+                String line = baos.toString("UTF-8");
+                System.out.println("Đang đọc từ offset " + entry.getValue() + ": " + line);
                 if (line != null && line.contains(":")) {
                     String[] parts = line.split(":", 2);
                     data.put(parts[0].toLowerCase(), parts[1]);
@@ -37,8 +45,7 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage{
 
     @Override
     public void save(Map<String, String> data) {
-        try (RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
-             BufferedWriter indexWriter = new BufferedWriter(new FileWriter(indexFile))) {
+        try (RandomAccessFile raf = new RandomAccessFile(dataFile, "rw"); BufferedWriter indexWriter = new BufferedWriter(new FileWriter(indexFile))) {
             raf.seek(raf.length()); // ghi vào cuối file
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 if (!indexMap.containsKey(entry.getKey())) {
@@ -60,7 +67,11 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage{
 
     private void loadIndex() {
         File file = new File(indexFile);
-        if (!file.exists()) return;
+        if (!file.exists()) {
+            buildIndexFromDataFile(); // THÊM DÒNG NÀY
+            return;
+        }
+
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -73,4 +84,22 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage{
             System.out.println("Lỗi đọc index: " + e.getMessage());
         }
     }
+    
+    private void buildIndexFromDataFile() {
+    try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
+        long pos;
+        String line;
+        while ((pos = raf.getFilePointer()) < raf.length()) {
+            line = raf.readLine();
+            if (line != null && line.contains(":")) {
+                String[] parts = line.split(":", 2);
+                indexMap.put(parts[0].toLowerCase(), pos);
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Lỗi tạo index từ file data: " + e.getMessage());
+    }
+}
+
+
 }
