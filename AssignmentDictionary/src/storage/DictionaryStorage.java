@@ -8,6 +8,8 @@ package storage;
  *
  * @author Lenovo
  */
-public class DictionaryStorage {
-    
+import java.util.Map;
+public interface DictionaryStorage {
+    void load(Map<String, String> data);
+    void save(Map<String, String> data);
 }
