@@ -8,32 +8,15 @@ package model;
  *
  * @author Lenovo
  */
-import storage.DictionaryStorage;
-import java.util.*;
+import java.util.List;
 
-public class Dictionary {
-      private final Map<String, String> data = new HashMap<>();
-    private final DictionaryStorage storage;
+public abstract class Dictionary {
 
-    public Dictionary(DictionaryStorage storage) {
-        this.storage = storage;
-        storage.load(data);
-        System.out.println("Từ điển load được: " + data.keySet());
+    public abstract void addWord(String word, String meaning);
 
-    }
+    public abstract String getMeaning(String word);
 
-    public String lookup(String word) {
-        return data.getOrDefault(word.toLowerCase(), "Không tìm thấy từ.");
-    }
+    public abstract List<String> getSuggestions(String prefix);
 
-    public void addWord(String word, String meaning) {
-        data.put(word.toLowerCase(), meaning);
-        storage.save(data);
-        System.out.println("Từ điển load được: " + data.keySet());
-
-    }
-
-    public Object getAllWords() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public abstract List<String> getAllWords();
 }

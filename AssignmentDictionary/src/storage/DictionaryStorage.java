@@ -8,8 +8,8 @@ package storage;
  *
  * @author Lenovo
  */
-import java.util.Map;
+import model.Dictionary;
 public interface DictionaryStorage {
-    void load(Map<String, String> data);
-    void save(Map<String, String> data);
+    Dictionary load();
+    void save(Dictionary dictionary);
 }

@@ -8,98 +8,60 @@ package storage;
  *
  * @author Lenovo
  */
-import java.io.*;
-import java.util.*;
 
+import model.Dictionary;
+import model.SimpleDictionary;
+
+import java.io.*;
+import java.util.Scanner;
 public class IndexedFileDictionaryStorage implements DictionaryStorage {
 
-    private final String dataFile = "dictionary.dat";
-    private final String indexFile = "index.idx";
-    private final Map<String, Long> indexMap = new HashMap<>();
+      private File file;
 
-    public IndexedFileDictionaryStorage() {
-        loadIndex();
+    public IndexedFileDictionaryStorage(String filePath) {
+        this.file = new File(filePath);
     }
 
     @Override
-    public void load(Map<String, String> data) {
-        try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
-            for (Map.Entry<String, Long> entry : indexMap.entrySet()) {
-                raf.seek(entry.getValue());
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                int b;
-                while ((b = raf.read()) != -1 && b != '\n') {
-                    baos.write(b);
-                }
-                String line = baos.toString("UTF-8");
-                System.out.println("Đang đọc từ offset " + entry.getValue() + ": " + line);
-                if (line != null && line.contains(":")) {
-                    String[] parts = line.split(":", 2);
-                    data.put(parts[0].toLowerCase(), parts[1]);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Lỗi khi đọc dictionary.dat: " + e.getMessage());
-        }
-    }
+    public Dictionary load() {
+        SimpleDictionary dictionary = new SimpleDictionary();
 
-    @Override
-    public void save(Map<String, String> data) {
-        try (RandomAccessFile raf = new RandomAccessFile(dataFile, "rw"); BufferedWriter indexWriter = new BufferedWriter(new FileWriter(indexFile))) {
-            raf.seek(raf.length()); // ghi vào cuối file
-            for (Map.Entry<String, String> entry : data.entrySet()) {
-                if (!indexMap.containsKey(entry.getKey())) {
-                    long pos = raf.getFilePointer();
-                    String line = entry.getKey() + ":" + entry.getValue() + "\n";
-                    raf.writeBytes(line);
-                    indexMap.put(entry.getKey(), pos);
-                }
-            }
-
-            for (Map.Entry<String, Long> idx : indexMap.entrySet()) {
-                indexWriter.write(idx.getKey() + ":" + idx.getValue());
-                indexWriter.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Lỗi ghi file: " + e.getMessage());
-        }
-    }
-
-    private void loadIndex() {
-        File file = new File(indexFile);
         if (!file.exists()) {
-            buildIndexFromDataFile(); // THÊM DÒNG NÀY
-            return;
+            System.out.println("Không tìm thấy file: " + file.getAbsolutePath());
+            return dictionary;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(":");
-                if (parts.length == 2) {
-                    indexMap.put(parts[0].toLowerCase(), Long.parseLong(parts[1]));
+        try (Scanner scanner = new Scanner(file)) {
+            int count = 0;
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+                if (!line.isEmpty()) {
+                    String[] parts = line.split(":", 2); // Đọc dấu :
+                    if (parts.length == 2) {
+                        String word = parts[0].trim();
+                        String meaning = parts[1].trim();
+                        dictionary.addWord(word, meaning);
+                        count++;
+                    }
                 }
             }
+            System.out.println("Đã load " + count + " từ từ file.");
         } catch (IOException e) {
-            System.out.println("Lỗi đọc index: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return dictionary;
     }
-    
-    private void buildIndexFromDataFile() {
-    try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
-        long pos;
-        String line;
-        while ((pos = raf.getFilePointer()) < raf.length()) {
-            line = raf.readLine();
-            if (line != null && line.contains(":")) {
-                String[] parts = line.split(":", 2);
-                indexMap.put(parts[0].toLowerCase(), pos);
+
+    @Override
+    public void save(Dictionary dictionary) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            for (String word : dictionary.getAllWords()) {
+                String meaning = dictionary.getMeaning(word);
+                writer.println(word + ":" + meaning); // Lưu theo định dạng :
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) {
-        System.out.println("Lỗi tạo index từ file data: " + e.getMessage());
     }
-}
-
-
 }

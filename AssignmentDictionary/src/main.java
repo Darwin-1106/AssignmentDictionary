@@ -8,10 +8,10 @@
  * @author Lenovo
  */
 import model.Dictionary;
-import model.SimpleDictionary;
-import storage.DictionaryStorage;
 import storage.IndexedFileDictionaryStorage;
 import ui.DictionaryApp;
+
+import javax.swing.*;
 
 public class main {
 
@@ -20,11 +20,13 @@ public class main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-   javax.swing.SwingUtilities.invokeLater(() -> {
-            DictionaryStorage storage = new IndexedFileDictionaryStorage(); // Sử dụng chỉ mục
-            SimpleDictionary dictionary = new SimpleDictionary(storage);
-            DictionaryApp app = new DictionaryApp(dictionary);
-            gui.setVisible(true);
+         SwingUtilities.invokeLater(() -> {
+            String filePath = "dictionary.dat";
+            IndexedFileDictionaryStorage storage = new IndexedFileDictionaryStorage(filePath);
+            Dictionary dictionary = storage.load();
+
+            DictionaryApp app = new DictionaryApp(dictionary, storage);
+            app.setVisible(true);
         });
     }
 }

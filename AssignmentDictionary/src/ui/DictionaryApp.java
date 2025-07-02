@@ -4,110 +4,154 @@
  */
 package ui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.List;
-import java.util.stream.Collectors;
 import model.Dictionary;
-import model.SimpleDictionary;
-import storage.DictionaryStorage;
 import storage.IndexedFileDictionaryStorage;
 
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public class DictionaryApp extends JFrame {
-    private JTextField searchField;
+
+    private Dictionary dictionary;
+    private IndexedFileDictionaryStorage storage;
+
+    private JTextField inputField;
     private JTextArea meaningArea;
+    private JButton addButton;
     private JList<String> suggestionList;
     private DefaultListModel<String> suggestionModel;
 
-    private Dictionary dictionary;
-
-    public DictionaryApp(Dictionary dictionary) {
+    public DictionaryApp(Dictionary dictionary, IndexedFileDictionaryStorage storage) {
         this.dictionary = dictionary;
-        setTitle("Từ điển - Java Swing");
-        setSize(600, 400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        this.storage = storage;
 
-        Color lightBlue = new Color(224, 247, 250);
-        getContentPane().setBackground(lightBlue);
+        setTitle("Từ điển Việt - Anh");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Gợi ý bên trái
+        Font font = new Font("Segoe UI", Font.PLAIN, 14);
+
         suggestionModel = new DefaultListModel<>();
         suggestionList = new JList<>(suggestionModel);
-        JScrollPane suggestionScroll = new JScrollPane(suggestionList);
-        suggestionScroll.setPreferredSize(new Dimension(150, 0));
-        add(suggestionScroll, BorderLayout.WEST);
+        suggestionList.setFont(font);
+        JScrollPane scrollPane = new JScrollPane(suggestionList);
+        scrollPane.setPreferredSize(new Dimension(180, 0));
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Gợi ý"));
+        add(scrollPane, BorderLayout.WEST);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(204, 229, 255));
 
-        // Trung tâm: ô nhập và nghĩa
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(lightBlue);
-        searchField = new JTextField();
-        meaningArea = new JTextArea();
-        meaningArea.setEditable(false);
+        inputField = new JTextField();
+        inputField.setFont(font);
+        inputField.setBorder(BorderFactory.createTitledBorder("Nhập từ"));
+
+        meaningArea = new JTextArea(6, 20);
+        meaningArea.setFont(font);
         meaningArea.setLineWrap(true);
         meaningArea.setWrapStyleWord(true);
+        JScrollPane meaningScroll = new JScrollPane(meaningArea);
+        meaningScroll.setBorder(BorderFactory.createTitledBorder("Nghĩa của từ"));
 
-        centerPanel.add(searchField, BorderLayout.NORTH);
-        centerPanel.add(new JScrollPane(meaningArea), BorderLayout.CENTER);
-        add(centerPanel, BorderLayout.CENTER);
+        addButton = new JButton("Thêm / Cập nhật nghĩa");
+        addButton.setFont(font);
 
-        // Sự kiện gợi ý
-        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateSuggestions(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateSuggestions(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {}
+        mainPanel.add(inputField, BorderLayout.NORTH);
+        mainPanel.add(meaningScroll, BorderLayout.CENTER);
+        mainPanel.add(addButton, BorderLayout.SOUTH);
+
+        add(mainPanel, BorderLayout.CENTER);
+
+        inputField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                updateSuggestions();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                updateSuggestions();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                updateSuggestions();
+            }
         });
 
-        // Nhấn Enter tìm
-        searchField.addActionListener(e -> lookupWord());
+        inputField.addActionListener(e -> lookupWord());
 
-        // Chọn từ gợi ý
         suggestionList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selected = suggestionList.getSelectedValue();
-                if (selected != null) {
-                    searchField.setText(selected);
-                    lookupWord();
+                String selectedWord = suggestionList.getSelectedValue();
+                if (selectedWord != null) {
+                    inputField.setText(selectedWord);
+                    meaningArea.setText(dictionary.getMeaning(selectedWord));
                 }
             }
         });
 
-        setVisible(true);
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String word = inputField.getText().trim();
+                String meaning = meaningArea.getText().trim();
+                if (!word.isEmpty() && !meaning.isEmpty()) {
+                    dictionary.addWord(word, meaning);
+                    storage.save(dictionary);
+                    updateSuggestions();
+                    JOptionPane.showMessageDialog(DictionaryApp.this,
+                            "Đã thêm / cập nhật từ: " + word,
+                            "Thành công",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(DictionaryApp.this,
+                            "Vui lòng nhập đầy đủ từ và nghĩa.",
+                            "Thiếu thông tin",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
     }
 
-    private DictionaryApp(SimpleDictionary dictionary) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    public DictionaryApp(SimpleDictionary dictionary) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-
-     private void updateSuggestions() {
-        String input = searchField.getText().toLowerCase();
-        List<String> words = dictionary.getAllWords().stream()
-                .filter(w -> w.startsWith(input))
-                .sorted()
-                .collect(Collectors.toList());
-
+    private void updateSuggestions() {
+        String prefix = inputField.getText().trim();
         suggestionModel.clear();
-        for (String word : words) {
-            suggestionModel.addElement(word);
+
+        if (!prefix.isEmpty()) {
+            for (String word : dictionary.getSuggestions(prefix)) {
+                suggestionModel.addElement(word);
+            }
+
+            for (String word : dictionary.getAllWords()) {
+                if (word.equalsIgnoreCase(prefix)) {
+                    meaningArea.setText(dictionary.getMeaning(word));
+                    return;
+                }
+            }
+
+            meaningArea.setText("");
+        } else {
+            meaningArea.setText("");
         }
     }
 
+    // Hàm xử lý tra nghĩa khi nhấn Enter
     private void lookupWord() {
-        String word = searchField.getText().toLowerCase();
-        String meaning = dictionary.lookup(word);
-        meaningArea.setText(meaning);
+        String word = inputField.getText().trim();
+        String meaning = dictionary.getMeaning(word);
+        if (meaning != null) {
+            meaningArea.setText(meaning);
+        } else {
+            meaningArea.setText("");
+            JOptionPane.showMessageDialog(this,
+                    "Không tìm thấy từ: " + word,
+                    "Không có kết quả",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
 
-    public static void main(String[] args) {
-        DictionaryStorage storage = new IndexedFileDictionaryStorage();
-        SimpleDictionary dictionary = new SimpleDictionary(storage);
-        DictionaryApp dictionaryApp = new DictionaryApp(dictionary);
-    }
 }
