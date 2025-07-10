@@ -10,8 +10,9 @@ package model;
  */
 import java.util.*;
 
-public class SimpleDictionary extends Dictionary{
-           private TreeMap<String, String> words;
+public class SimpleDictionary extends Dictionary {
+
+    private final TreeMap<String, String> words;
 
     public SimpleDictionary() {
         words = new TreeMap<>();
@@ -40,8 +41,7 @@ public class SimpleDictionary extends Dictionary{
     }
 
     @Override
-    public List<String> getAllWords() {
-        return new ArrayList<>(words.keySet());
+    public Map<String, String> getAllWords() {
+        return words; // 'words' là TreeMap<String, String>
     }
 }
-

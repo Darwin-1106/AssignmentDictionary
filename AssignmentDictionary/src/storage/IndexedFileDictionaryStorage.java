@@ -8,60 +8,49 @@ package storage;
  *
  * @author Lenovo
  */
-
 import model.Dictionary;
-import model.SimpleDictionary;
-
 import java.io.*;
-import java.util.Scanner;
+import java.util.Map;
+
 public class IndexedFileDictionaryStorage implements DictionaryStorage {
 
-      private File file;
+    private final String filePath;
 
     public IndexedFileDictionaryStorage(String filePath) {
-        this.file = new File(filePath);
+        this.filePath = filePath;
     }
 
     @Override
-    public Dictionary load() {
-        SimpleDictionary dictionary = new SimpleDictionary();
-
-        if (!file.exists()) {
-            System.out.println("Không tìm thấy file: " + file.getAbsolutePath());
-            return dictionary;
-        }
-
-        try (Scanner scanner = new Scanner(file)) {
-            int count = 0;
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (!line.isEmpty()) {
-                    String[] parts = line.split(":", 2); // Đọc dấu :
-                    if (parts.length == 2) {
-                        String word = parts[0].trim();
-                        String meaning = parts[1].trim();
-                        dictionary.addWord(word, meaning);
-                        count++;
-                    }
+    public void load(Dictionary dictionary) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int index = line.indexOf(":");
+                if (index != -1) {
+                    String word = line.substring(0, index).trim();
+                    String meaning = line.substring(index + 1).trim();
+                    dictionary.addWord(word, meaning);
                 }
             }
-            System.out.println("Đã load " + count + " từ từ file.");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("[LOAD ERROR] " + e.getMessage());
         }
-
-        return dictionary;
     }
 
     @Override
     public void save(Dictionary dictionary) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-            for (String word : dictionary.getAllWords()) {
-                String meaning = dictionary.getMeaning(word);
-                writer.println(word + ":" + meaning); // Lưu theo định dạng :
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.filePath))) {
+            for (Map.Entry<String, String> entry : dictionary.getAllWords().entrySet()) {
+                writer.write(entry.getKey() + ":" + entry.getValue());
+                writer.newLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("[SAVE ERROR] " + e.getMessage());
         }
+    }
+
+    @Override
+    public Dictionary load() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

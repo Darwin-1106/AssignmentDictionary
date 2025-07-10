@@ -44,7 +44,7 @@ public class DictionaryApp extends JFrame {
         scrollPane.setPreferredSize(new Dimension(180, 0));
         scrollPane.setBorder(BorderFactory.createTitledBorder("Gợi ý"));
         add(scrollPane, BorderLayout.WEST);
-        
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(204, 229, 255));
 
@@ -123,10 +123,10 @@ public class DictionaryApp extends JFrame {
 
         if (!prefix.isEmpty()) {
             for (String word : dictionary.getSuggestions(prefix)) {
-                suggestionModel.addElement(word);
+                suggestionModel.addElement(word); 
             }
 
-            for (String word : dictionary.getAllWords()) {
+            for (String word : dictionary.getAllWords().keySet()) {
                 if (word.equalsIgnoreCase(prefix)) {
                     meaningArea.setText(dictionary.getMeaning(word));
                     return;
@@ -139,7 +139,6 @@ public class DictionaryApp extends JFrame {
         }
     }
 
-    // Hàm xử lý tra nghĩa khi nhấn Enter
     private void lookupWord() {
         String word = inputField.getText().trim();
         String meaning = dictionary.getMeaning(word);

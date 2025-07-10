@@ -12,6 +12,7 @@ import storage.IndexedFileDictionaryStorage;
 import ui.DictionaryApp;
 
 import javax.swing.*;
+import model.SimpleDictionary;
 
 public class main {
 
@@ -20,10 +21,12 @@ public class main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-         SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             String filePath = "dictionary.dat";
             IndexedFileDictionaryStorage storage = new IndexedFileDictionaryStorage(filePath);
-            Dictionary dictionary = storage.load();
+
+            Dictionary dictionary = new SimpleDictionary();
+            storage.load(dictionary);
 
             DictionaryApp app = new DictionaryApp(dictionary, storage);
             app.setVisible(true);

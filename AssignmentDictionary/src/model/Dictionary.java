@@ -9,6 +9,7 @@ package model;
  * @author Lenovo
  */
 import java.util.List;
+import java.util.Map;
 
 public abstract class Dictionary {
 
@@ -18,5 +19,5 @@ public abstract class Dictionary {
 
     public abstract List<String> getSuggestions(String prefix);
 
-    public abstract List<String> getAllWords();
+    public abstract Map<String, String> getAllWords();
 }

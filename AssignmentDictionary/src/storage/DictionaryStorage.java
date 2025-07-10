@@ -9,7 +9,11 @@ package storage;
  * @author Lenovo
  */
 import model.Dictionary;
+
 public interface DictionaryStorage {
     Dictionary load();
+
+    void load(Dictionary dictionary);
+
     void save(Dictionary dictionary);
 }
