@@ -5,7 +5,9 @@
 package ui;
 
 import model.Dictionary;
+import model.WordHelper;
 import storage.IndexedFileDictionaryStorage;
+import storage.ExampleSentenceStorage;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -18,16 +20,19 @@ public class DictionaryApp extends JFrame {
 
     private Dictionary dictionary;
     private IndexedFileDictionaryStorage storage;
+    private ExampleSentenceStorage exampleStorage;
 
     private JTextField inputField;
     private JTextArea meaningArea;
     private JButton addButton;
+    private JButton helperButton;
     private JList<String> suggestionList;
     private DefaultListModel<String> suggestionModel;
 
     public DictionaryApp(Dictionary dictionary, IndexedFileDictionaryStorage storage) {
         this.dictionary = dictionary;
         this.storage = storage;
+        this.exampleStorage = new ExampleSentenceStorage("examples.dat");
 
         setTitle("Từ điển Việt - Anh");
         setSize(600, 400);
@@ -62,9 +67,16 @@ public class DictionaryApp extends JFrame {
         addButton = new JButton("Thêm / Cập nhật nghĩa");
         addButton.setFont(font);
 
+        helperButton = new JButton("🔡 Đánh vần / 📝 Câu ví dụ");
+        helperButton.setFont(font);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(addButton);
+        buttonPanel.add(helperButton);
+
         mainPanel.add(inputField, BorderLayout.NORTH);
         mainPanel.add(meaningScroll, BorderLayout.CENTER);
-        mainPanel.add(addButton, BorderLayout.SOUTH);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel, BorderLayout.CENTER);
 
@@ -115,6 +127,21 @@ public class DictionaryApp extends JFrame {
                 }
             }
         });
+
+        helperButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String word = inputField.getText().trim();
+                if (!word.isEmpty()) {
+                    String spelling = WordHelper.spellWord(word);
+                    String example = exampleStorage.getExample(word);
+                    JOptionPane.showMessageDialog(DictionaryApp.this,
+                            "Đánh vần: " + spelling + "\nVí dụ: " + example,
+                            "Thông tin từ",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
     }
 
     private void updateSuggestions() {
@@ -152,5 +179,5 @@ public class DictionaryApp extends JFrame {
                     JOptionPane.WARNING_MESSAGE);
         }
     }
-
 }
+
