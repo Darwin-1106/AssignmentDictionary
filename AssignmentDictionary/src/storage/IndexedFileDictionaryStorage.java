@@ -16,11 +16,13 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage {
 
     private final String filePath;
 
+//save file path
     public IndexedFileDictionaryStorage(String filePath) {
         this.filePath = filePath;
     }
 
     @Override
+//add to dictionary
     public void load(Dictionary dictionary) {
         try (BufferedReader reader = new BufferedReader(new FileReader(this.filePath))) {
             String line;
@@ -38,6 +40,7 @@ public class IndexedFileDictionaryStorage implements DictionaryStorage {
     }
 
     @Override
+//write each line word:meaning
     public void save(Dictionary dictionary) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.filePath))) {
             for (Map.Entry<String, String> entry : dictionary.getAllWords().entrySet()) {

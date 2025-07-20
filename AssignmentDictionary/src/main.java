@@ -11,7 +11,7 @@ import model.Dictionary;
 import storage.IndexedFileDictionaryStorage;
 import ui.DictionaryApp;
 
-import javax.swing.*;
+import javax.swing.*;//interface library
 import model.SimpleDictionary;
 
 public class main {
@@ -22,6 +22,7 @@ public class main {
     public static void main(String[] args) {
         // TODO code application logic here
         SwingUtilities.invokeLater(() -> {
+//file path to save dictionary
             String filePath = "dictionary.dat";
             IndexedFileDictionaryStorage storage = new IndexedFileDictionaryStorage(filePath);
 

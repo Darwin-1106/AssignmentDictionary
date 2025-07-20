@@ -11,6 +11,7 @@ package model;
 import java.util.*;
 
 public class SimpleDictionary extends Dictionary {
+//word structure and meaning
 
     private final TreeMap<String, String> words;
 
@@ -19,16 +20,19 @@ public class SimpleDictionary extends Dictionary {
     }
 
     @Override
+//add word, convert to lowercase and add meaning
     public void addWord(String word, String meaning) {
         words.put(word.toLowerCase(), meaning);
     }
 
     @Override
+//return the meaning of the word
     public String getMeaning(String word) {
         return words.get(word.toLowerCase());
     }
 
     @Override
+//add words starting with prefix
     public List<String> getSuggestions(String prefix) {
         prefix = prefix.toLowerCase();
         List<String> suggestions = new ArrayList<>();
@@ -41,6 +45,7 @@ public class SimpleDictionary extends Dictionary {
     }
 
     @Override
+//return the entire dictionary
     public Map<String, String> getAllWords() {
         return words; // 'words' là TreeMap<String, String>
     }

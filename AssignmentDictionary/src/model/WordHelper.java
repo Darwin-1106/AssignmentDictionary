@@ -9,9 +9,11 @@ package model;
  * @author Lenovo
  */
 public class WordHelper {
+//return example sentence
     public static String generateExampleSentence(String word) {
         return "This is an example sentence with the word: \"" + word + "\".";
     }
+//spell each letter
     public static String spellWord(String word) {
         StringBuilder sb = new StringBuilder();
         for (char c : word.toUpperCase().toCharArray()) {

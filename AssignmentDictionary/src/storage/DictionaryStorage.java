@@ -11,9 +11,10 @@ package storage;
 import model.Dictionary;
 
 public interface DictionaryStorage {
+//download new dictionary
     Dictionary load();
-
+//load data into existing dictionary
     void load(Dictionary dictionary);
-
+//save dictionary to file
     void save(Dictionary dictionary);
 }

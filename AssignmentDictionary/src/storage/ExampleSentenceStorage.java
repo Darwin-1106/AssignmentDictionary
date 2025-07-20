@@ -12,6 +12,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+//load data from file into map
 public class ExampleSentenceStorage {
      private final String filePath;
     private Map<String, String> exampleMap = new HashMap<>();
@@ -21,6 +22,7 @@ public class ExampleSentenceStorage {
         loadExamples();
     }
 
+//add to map
     private void loadExamples() {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -37,6 +39,7 @@ public class ExampleSentenceStorage {
         }
     }
 
+//return example
     public String getExample(String word) {
         return exampleMap.getOrDefault(word, "Chưa có ví dụ cho từ này.");
     }
